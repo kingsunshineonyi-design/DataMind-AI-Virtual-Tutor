@@ -32,7 +32,7 @@
     },
     {
       "parameters": {
-        "sendTo": "kingsunshineonyi@gmail.com",
+        "sendTo": "your-email@example.com",
         "subject": "={{ $json.subject ?? 'AI Virtual Tutor Update - ' + new Date().toLocaleDateString() }}",
         "message": "={{ $('Code in JavaScript').item.json.htmlEmail }}",
         "options": {}
