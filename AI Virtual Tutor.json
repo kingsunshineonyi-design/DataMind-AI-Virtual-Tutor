@@ -1,0 +1,671 @@
+{
+  "name": "AI Virtual Tutor",
+  "nodes": [
+    {
+      "parameters": {
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.chatTrigger",
+      "typeVersion": 1.4,
+      "position": [
+        -320,
+        -880
+      ],
+      "id": "1fc90119-c453-48d0-90a6-a5aea4d4b7ac",
+      "name": "When chat message received",
+      "webhookId": "44441b85-a6bc-4861-bf9b-03917fddb2af"
+    },
+    {
+      "parameters": {
+        "mode": "markdownToHtml",
+        "markdown": ".html",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.markdown",
+      "typeVersion": 1,
+      "position": [
+        1392,
+        -960
+      ],
+      "id": "9dbdd5ed-202d-451b-b980-38322d78d252",
+      "name": "Markdown"
+    },
+    {
+      "parameters": {
+        "sendTo": "kingsunshineonyi@gmail.com",
+        "subject": "={{ $json.subject ?? 'AI Virtual Tutor Update - ' + new Date().toLocaleDateString() }}",
+        "message": "={{ $('Code in JavaScript').item.json.htmlEmail }}",
+        "options": {}
+      },
+      "type": "n8n-nodes-base.gmail",
+      "typeVersion": 2.2,
+      "position": [
+        2544,
+        -880
+      ],
+      "id": "fff14e58-e19c-4231-b8cc-526d925a9cb5",
+      "name": "Send Update on AI Virtual Tutor",
+      "webhookId": "717adc56-e9bd-4b11-8da5-f6fcdf0f0df8",
+      "credentials": {
+        "gmailOAuth2": {
+          "id": "Vw2z2JJyo8HAoASx",
+          "name": "Gmail account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "sessionIdType": "customKey",
+        "sessionKey": "={{ $json.sessionId ?? 'scheduled-reminder' }}",
+        "contextWindowLength": 20
+      },
+      "type": "@n8n/n8n-nodes-langchain.memoryBufferWindow",
+      "typeVersion": 1.3,
+      "position": [
+        -208,
+        -432
+      ],
+      "id": "e1ad36e9-f84e-499e-be8e-fe5d32077596",
+      "name": "Simple Memory"
+    },
+    {
+      "parameters": {
+        "q": "={{ /*n8n-auto-generated-fromAI-override*/ $fromAI('Search_Query__q_', `Search query for data analytics topics only. \nAlways include data analytics context in the query.`, 'string') }}",
+        "location": "=United Kingdom",
+        "additionalFields": {},
+        "requestOptions": {}
+      },
+      "type": "n8n-nodes-serpapi.serpApiTool",
+      "typeVersion": 1,
+      "position": [
+        -32,
+        -368
+      ],
+      "id": "b9b305ac-6039-4960-addb-48bc3442db1e",
+      "name": "Search Information about data analytics",
+      "credentials": {
+        "serpApi": {
+          "id": "BLImM053lNnoVgoe",
+          "name": "SerpApi account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "jsCode": "const rawOutput = $input.first().json.output || \n                  $input.first().json.text || \n                  \"Hello! How can I help you today?\";\n\n// Remove routing word at the end\nconst cleanOutput = rawOutput\n  .replace(/\\n*(teaching|quiz|research|assessment)\\s*$/i, \"\")\n  .trim();\n\n// Detect response type for styling\nconst isQuiz = /quiz|question|test/i.test(rawOutput);\nconst isResearch = /research|paper|study|academic/i.test(rawOutput);\nconst isAssessment = /assessment|evaluation|past paper/i.test(rawOutput);\nconst isGreeting = /hello|hi |hey|greet|welcome/i.test(rawOutput);\n\n// Set theme color based on type\nconst themeColor = isQuiz ? \"#e74c3c\" : \n                   isResearch ? \"#27ae60\" : \n                   isAssessment ? \"#e67e22\" : \n                   isGreeting ? \"#2980b9\" : \"#667eea\";\n\nconst themeIcon = isQuiz ? \"📝\" : \n                  isResearch ? \"🔬\" : \n                  isAssessment ? \"📋\" : \n                  isGreeting ? \"👋\" : \"📚\";\n\nconst themeLabel = isQuiz ? \"Quiz Mode\" : \n                   isResearch ? \"Research Mode\" : \n                   isAssessment ? \"Assessment Mode\" : \n                   isGreeting ? \"AI Virtual Tutor\" : \"Teaching Mode\";\n\nconst htmlEmail = `\n<!DOCTYPE html>\n<html>\n<head>\n  <style>\n    body{font-family:Arial,sans-serif;background:#f4f4f4;margin:0;padding:20px;}\n    .container{background:#fff;max-width:650px;margin:auto;border-radius:12px;overflow:hidden;box-shadow:0 4px 12px rgba(0,0,0,0.1);}\n    .header{background:linear-gradient(135deg,${themeColor},#764ba2);padding:30px;text-align:center;}\n    .header h1{color:white;margin:0;font-size:24px;}\n    .header p{color:#e0d7ff;margin:5px 0 0;font-size:14px;}\n    .body{padding:25px;color:#333;line-height:1.8;}\n    .ai-message{background:#f8f7ff;border-left:4px solid ${themeColor};padding:15px 20px;margin:15px 0;border-radius:0 8px 8px 0;}\n    .tip{background:#fff8e1;border-left:4px solid #ffc107;padding:15px 20px;margin:15px 0;border-radius:0 8px 8px 0;}\n    .greeting-box{background:linear-gradient(135deg,#f8f7ff,#e8f4fd);border:2px solid ${themeColor};padding:20px;margin:15px 0;border-radius:12px;text-align:center;}\n    .greeting-box h2{color:${themeColor};margin:0 0 10px;}\n    .menu-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin:15px 0;}\n    .menu-item{background:#f8f7ff;border:2px solid #eee;border-radius:8px;padding:15px;text-align:center;font-size:13px;}\n    .menu-item:hover{border-color:${themeColor};}\n    .menu-icon{font-size:24px;display:block;margin-bottom:5px;}\n    table{width:100%;border-collapse:collapse;margin:10px 0;}\n    th{background:${themeColor};color:white;padding:10px 15px;text-align:left;font-size:13px;}\n    td{padding:10px 15px;border-bottom:1px solid #eee;font-size:13px;}\n    .badge{display:inline-block;background:${themeColor};color:white;padding:4px 12px;border-radius:20px;font-size:12px;margin-bottom:10px;}\n    .footer{background:linear-gradient(135deg,${themeColor},#764ba2);padding:20px;text-align:center;color:white;font-size:13px;}\n    code{background:#f4f4f4;padding:2px 6px;border-radius:4px;font-family:monospace;font-size:13px;color:#e74c3c;}\n    pre{background:#1e1e1e;color:#f8f8f2;padding:15px;border-radius:8px;overflow-x:auto;font-size:13px;line-height:1.6;}\n  </style>\n</head>\n<body>\n<div class=\"container\">\n\n  <!-- HEADER -->\n  <div class=\"header\">\n    <h1>${themeIcon} ${themeLabel}</h1>\n    <p>MSc Computing & Digital Technologies — Northumbria University</p>\n    <p style=\"color:#ffd700;font-size:13px;margin-top:8px;\">\n      🤖 AI Virtual Tutor — Powered by Claude AI\n    </p>\n  </div>\n\n  <!-- GREETING SECTION (shows only for greetings) -->\n  ${isGreeting ? `\n  <div class=\"body\">\n    <div class=\"greeting-box\">\n      <h2>👋 Welcome back, King!</h2>\n      <p>Your personal AI Virtual Tutor is ready to help you excel in your MSc Data Analytics studies.</p>\n    </div>\n    <div class=\"menu-grid\">\n      <div class=\"menu-item\">\n        <span class=\"menu-icon\">📚</span>\n        <strong>Teaching</strong><br>\n        <small>Learn any topic in depth</small>\n      </div>\n      <div class=\"menu-item\">\n        <span class=\"menu-icon\">📝</span>\n        <strong>Quiz</strong><br>\n        <small>Test your knowledge</small>\n      </div>\n      <div class=\"menu-item\">\n        <span class=\"menu-icon\">🔬</span>\n        <strong>Research</strong><br>\n        <small>Find academic papers</small>\n      </div>\n      <div class=\"menu-item\">\n        <span class=\"menu-icon\">📋</span>\n        <strong>Assessment</strong><br>\n        <small>Exam prep & past papers</small>\n      </div>\n    </div>\n    <div class=\"tip\">\n      💡 <strong>Try asking:</strong> \"Teach me about machine learning\" or \n      \"Give me a Python quiz\" or \"Research data analytics methodology\"\n    </div>\n  </div>\n  ` : \"\"}\n\n  <!-- MAIN CONTENT -->\n  <div class=\"body\">\n    ${isGreeting ? \"\" : `<span class=\"badge\">${themeIcon} ${themeLabel}</span>`}\n    <div class=\"ai-message\">\n      ${cleanOutput.replace(/\\n/g, \"<br>\").replace(/\\*\\*(.*?)\\*\\*/g, \"<strong>$1</strong>\").replace(/`(.*?)`/g, \"<code>$1</code>\")}\n    </div>\n    ${!isGreeting ? `\n    <div class=\"tip\">\n      💡 <strong>Study Tip:</strong> Consistency beats intensity. \n      Even 30 focused minutes daily compounds into mastery. \n      Review this material again in 2-3 days using spaced repetition!\n    </div>` : \"\"}\n  </div>\n\n  <!-- FOOTER -->\n  <div class=\"footer\">\n    🎓 Keep pushing forward, King! Your MSc journey is shaping your future.<br>\n    <small>📅 Study Schedule: Mon-Fri 7pm-10pm | Sat 11am-3pm | Sun Rest Day</small><br>\n    <small>Powered by AI Virtual Tutor via n8n & Claude AI</small>\n  </div>\n\n</div>\n</body>\n</html>`;\n\nreturn [{ json: { htmlEmail } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        2288,
+        -864
+      ],
+      "id": "4ae5035c-5686-4f9c-ad28-823916356ba2",
+      "name": "Code in JavaScript"
+    },
+    {
+      "parameters": {
+        "promptType": "define",
+        "text": "={{ $('When chat message received').item.json.chatInput }}",
+        "options": {
+          "systemMessage": "# SYSTEM PROMPT — DATA ANALYTICS AI TUTOR AGENT\n\n## Identity & Core Purpose\nYou are an expert AI Tutor specialising in Data Analytics at postgraduate level (MSc Computing & Digital Technologies). Your name is DataMind. You are tutoring King, a postgraduate student at Northumbria University. Your sole purpose is to support King's active learning, self-assessment, and structured study in Data Analytics. You are not a general-purpose assistant — always redirect off-topic requests back to the learning mission.\n\n---\n\n## User Profile\nYou are tutoring King, who is:\n- A postgraduate student enrolled in MSc Computing & Digital Technologies at Northumbria University\n- Technically capable and professionally experienced in Quality Assurance and HSE — do not over-explain foundational computing basics unless explicitly asked\n- Time-constrained — keep sessions focused, efficient, and outcome-driven\n- An applied learner — responds best to real-world examples, worked scenarios, and practical context\n- Balancing academic study with professional work commitments in Nigeria and the UK\n\nAlways treat King as an intelligent adult. Be direct, clear, and respectful of his time.\n\n---\n\n## Subject Domain\nYou are knowledgeable across all the following Data Analytics topics at MSc level:\n\n- Data wrangling & preprocessing (cleaning, transformation, normalisation)\n- Exploratory Data Analysis (EDA) & statistical reasoning\n- SQL & database querying for analytics\n- Data visualisation (principles, tools, storytelling with data)\n- Descriptive, diagnostic, predictive & prescriptive analytics\n- Machine learning fundamentals (supervised, unsupervised, model evaluation)\n- Statistical methods (regression, hypothesis testing, probability)\n- Data warehousing & dimensional modelling (star schema, Kimball methodology)\n- Business intelligence tools & dashboarding concepts\n- Research methods & analytics project design\n- Python for data analytics (pandas, numpy, matplotlib, seaborn, scikit-learn)\n\nIf a topic falls clearly outside this domain, say so honestly and redirect King.\n\n---\n\n## Core Capabilities\n\n### 1. EXPLAIN CONCEPTS\nWhen asked to explain a topic:\n- Break it down in plain, structured language — lead with the core idea, then build depth\n- Always use a relevant data analytics worked example or real-world scenario\n- Adapt depth based on King's stated or apparent familiarity\n- Clearly distinguish between conceptual understanding and practical application\n- After explaining, always ask: \"Does that make sense, or would you like me to go deeper on any part?\"\n\n### 2. QUIZ & TEST KNOWLEDGE\nWhen King asks to be quizzed or tested:\n- First ask: what topic, what difficulty level (foundational / intermediate / advanced), and how many questions\n- Generate questions in a mix of formats: MCQ, short answer, interpret-this-output, scenario-based\n- Align difficulty to Bloom's Taxonomy — from recall (remember/understand) up to analysis and evaluation\n- Present one question at a time unless King requests a full quiz sheet\n- Do not reveal the answer until King has responded\n- For exam-style practice, note the time and encourage King to respond within a set window\n- After each answer, provide structured feedback before moving to the next question\n\n### 3. GIVE FEEDBACK ON ANSWERS\nWhen evaluating King's answers:\n- Always provide specific, constructive, academically rigorous feedback\n- Structure your feedback as:\n  ✅ What was correct\n  ⚠️ What was partially correct or missing\n  💡 Why the correct answer is what it is\n- Never just say \"correct\" or \"incorrect\" — always explain the reasoning\n- Identify and gently correct any misconceptions directly\n- Suggest a follow-up question or topic if a gap is identified\n- End feedback with an encouraging note to maintain motivation\n\n### 4. GENERATE STUDY PLANS\nWhen King asks for a study plan:\n- Ask first: What is the topic or module? What is the deadline or exam date? How many hours per week are available? What is the current confidence level on a scale of 1-5?\n- Build a structured plan with daily or weekly goals and clear milestones\n- Prioritise harder or lower-confidence topics earlier in the plan\n- Format the plan clearly in a table with columns: Day/Week | Topic | Activity | Duration | Goal\n- Flag that the plan can be adjusted — invite King to return and update it as priorities change\n\n### 5. SUMMARISE DOCUMENTS OR NOTES\nWhen King shares lecture notes, slides, readings, or coursework briefs:\n- Produce a concise, well-structured summary at postgraduate level\n- Extract and highlight: key concepts, definitions, formulas, and relationships\n- Always offer to convert the summary into a revision-ready format:\n  - Bullet-point revision notes\n  - Comparison or summary table\n  - Flashcard-style Q&A pairs\n- Ask King which format he prefers before producing the output\n\n### 6. DAILY PROGRESS UPDATE\nAt the start of each session or when King asks for a progress update:\n- Summarise topics covered in recent sessions\n- Highlight areas of demonstrated strength based on quiz and feedback history\n- Identify topics that need more practice or revisiting\n- Suggest what to focus on in today's session based on the study plan or upcoming deadlines\n- Keep the update brief, encouraging, and actionable — no more than a short paragraph\n- Format: 💪 Strengths | ⚠️ Needs Practice | 🎯 Today's Focus\n\n### 7. RESEARCH ASSISTANCE\nWhen King asks for research on a topic:\n- Use the search tool to find current, relevant information\n- Always frame search queries with \"data analytics\" context to ensure relevant results\n- Summarise findings clearly at postgraduate academic level\n- Cite sources where possible\n- Distinguish between what you found via search vs your own knowledge\n\n---\n\n## Behavioural Guidelines\n- Always address King by name occasionally to keep the interaction personal\n- Maintain an encouraging, honest, and academically rigorous tone throughout\n- Teach the reasoning behind every answer — never just give the answer without explanation\n- Ask clarifying questions before generating study plans, quizzes, or summaries\n- Use data analytics scenarios as examples at all times — avoid generic or unrelated analogies\n- Build progressively on context established earlier in the session\n- Define technical terms on first use — do not assume familiarity with jargon\n- If King seems confused or stuck, adjust your approach and check in\n- Never fabricate facts, formulas, or academic references — if unsure, say so clearly\n- Keep responses focused and well-structured — use headers, bullet points, and emoji sparingly but effectively\n\n---\n\n## Session Opening\nBegin every new session with:\n\"👋 Welcome back, King! Here's a quick update on your Data Analytics progress:\n💪 Strengths: [topics covered well]\n⚠️ Needs Practice: [topics to revisit]\n🎯 Today's Focus: [recommended session focus]\nWhat would you like to work on today — concept explanation, a quiz, study planning, research, or something else?\"\n\nIf it is the very first session, introduce yourself:\n\"👋 Hi King! I'm DataMind, your personal Data Analytics AI Tutor, here to help you master your MSc-level Data Analytics topics at Northumbria University. I can explain concepts, quiz you, give detailed feedback, build study plans, summarise your notes, and research topics for you. What shall we start with today?\"\n\nIMPORTANT: You must always end every response with \nexactly one of these words on its own line:\nteaching\nquiz\nresearch\nassessment\n\nFor greetings and general messages use: teaching",
+          "maxIterations": 4
+        }
+      },
+      "type": "@n8n/n8n-nodes-langchain.agent",
+      "typeVersion": 3.1,
+      "position": [
+        240,
+        -960
+      ],
+      "id": "0c31bd9b-93f9-44e5-b88c-2f1cfb005aae",
+      "name": "AI Agent"
+    },
+    {
+      "parameters": {
+        "rules": {
+          "values": [
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "teaching",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    },
+                    "id": "dbe3e835-119f-45b1-be9c-d2f8bf151ac6"
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Output 1"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "9f940c17-d4ea-402c-836b-0baf5017024b",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "quiz",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Output 2"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "3b0f6dd8-e5ce-48ac-90a6-50823f9c5fef",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "research",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Output 3"
+            },
+            {
+              "conditions": {
+                "options": {
+                  "caseSensitive": true,
+                  "leftValue": "",
+                  "typeValidation": "strict",
+                  "version": 3
+                },
+                "conditions": [
+                  {
+                    "id": "f6417db0-3c6e-4c99-a60a-612275c35e62",
+                    "leftValue": "={{ $json.output }}",
+                    "rightValue": "assessment",
+                    "operator": {
+                      "type": "string",
+                      "operation": "contains"
+                    }
+                  }
+                ],
+                "combinator": "and"
+              },
+              "renameOutput": true,
+              "outputKey": "Output 4"
+            }
+          ]
+        },
+        "options": {
+          "fallbackOutput": "extra",
+          "allMatchingOutputs": false
+        }
+      },
+      "type": "n8n-nodes-base.switch",
+      "typeVersion": 3.4,
+      "position": [
+        1664,
+        -1008
+      ],
+      "id": "f8b8cef6-3a1d-44dd-abcc-6d278cd8f183",
+      "name": "Task",
+      "alwaysOutputData": false
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to fetch teaching materials and explanations \nwhen the user asks to learn, understand or be taught about \na topic in data analytics, (Python, Statistics, SQL, Data Virtualization) MSc Computing studies \nat Northumbria University. Returns the response data",
+        "url": "https://api.openalex.org/works",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "=search",
+              "value": "{{ $fromAI('topic', 'The teaching topic to explain') }}"
+            },
+            {
+              "name": "filter",
+              "value": "type:article"
+            },
+            {
+              "name": "per_page",
+              "value": "3"
+            },
+            {
+              "name": "sort",
+              "value": "publication_year:desc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        160,
+        -256
+      ],
+      "id": "d55cb41b-ab71-4f37-b832-112a68f6d882",
+      "name": "Teacher"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to fetch academic research papers when the \nuser asks to research, investigate or find studies about \na topic in data analytics.",
+        "url": "https://api.openalex.org/works",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "search",
+              "value": "={{ $fromAI('topic', 'The research topic to investigate') }}"
+            },
+            {
+              "name": "filter",
+              "value": "type:article"
+            },
+            {
+              "name": "per_page",
+              "value": "5"
+            },
+            {
+              "name": "sort",
+              "value": "cited_by_count:desc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        784,
+        -240
+      ],
+      "id": "9f78cd56-44f7-4f71-ab1c-6fdb378e0916",
+      "name": "Research"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to fetch quiz questions when the user asks \nfor a quiz, test, or practice questions about data \nanalytics as an MSc student in computer science topics",
+        "url": "https://opentdb.com/api.php",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "amount",
+              "value": "5"
+            },
+            {
+              "name": "category",
+              "value": "18"
+            },
+            {
+              "name": "difficulty",
+              "value": "={{ $fromAI('difficulty', 'easy, medium or hard') }}"
+            },
+            {
+              "name": "type",
+              "value": "multiple"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        416,
+        -240
+      ],
+      "id": "9a25d82e-6d94-4219-8e33-3564e38f9bf1",
+      "name": "Quiz"
+    },
+    {
+      "parameters": {
+        "toolDescription": "Use this tool to fetch academic assessment materials, \npast questions and study resources when the user asks \nfor an assessment, past papers, or an evaluation on data \nanalytics, as an MSc Student",
+        "url": "https://api.openalex.org/works",
+        "sendQuery": true,
+        "queryParameters": {
+          "parameters": [
+            {
+              "name": "search",
+              "value": "={{ $fromAI('topic', 'The assessment topic to search for') }}"
+            },
+            {
+              "name": "filter",
+              "value": "type:article"
+            },
+            {
+              "name": "per_page",
+              "value": "5"
+            },
+            {
+              "name": "sort",
+              "value": "cited_by_count:desc"
+            }
+          ]
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.httpRequestTool",
+      "typeVersion": 4.4,
+      "position": [
+        1040,
+        -320
+      ],
+      "id": "75514c6d-6415-4ffd-8fa3-a251b9665749",
+      "name": "Assessment"
+    },
+    {
+      "parameters": {
+        "model": {
+          "__rl": true,
+          "mode": "list",
+          "value": "claude-sonnet-4-5-20250929",
+          "cachedResultName": "Claude Sonnet 4.5"
+        },
+        "options": {}
+      },
+      "type": "@n8n/n8n-nodes-langchain.lmChatAnthropic",
+      "typeVersion": 1.3,
+      "position": [
+        -256,
+        -640
+      ],
+      "id": "1dca6acd-bf98-433e-b6e3-b04e7310f703",
+      "name": "Anthropic Chat Model",
+      "credentials": {
+        "anthropicApi": {
+          "id": "QBpkQaxSiALSWOxO",
+          "name": "Anthropic account"
+        }
+      }
+    },
+    {
+      "parameters": {
+        "conditions": {
+          "options": {
+            "caseSensitive": true,
+            "leftValue": "",
+            "typeValidation": "strict",
+            "version": 3
+          },
+          "conditions": [
+            {
+              "id": "47f3102d-a792-4b79-b132-aaa2f68fadcf",
+              "leftValue": "={{ $('When chat message received').item.json.chatInput.toLowerCase() }} contains \"done for today\"",
+              "rightValue": "done for today",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            },
+            {
+              "id": "0941ae1d-d4ad-4c84-b80e-76f58e1b90ff",
+              "leftValue": "end session",
+              "rightValue": "={{ $('When chat message received').item.json.chatInput.toLowerCase() }}",
+              "operator": {
+                "type": "string",
+                "operation": "contains"
+              }
+            }
+          ],
+          "combinator": "or"
+        },
+        "options": {}
+      },
+      "type": "n8n-nodes-base.if",
+      "typeVersion": 2.3,
+      "position": [
+        624,
+        -960
+      ],
+      "id": "380d9fb8-6fce-4080-bf09-dc35ca75d8d6",
+      "name": "If"
+    },
+    {
+      "parameters": {
+        "jsCode": "// n8n Code node — Validation Layer\n// Place between: If node → this node → Markdown node\n\nconst VALID_ROUTES = ['teacher', 'quiz', 'research', 'assessment'];\n\nconst item = $input.first();\nconst body = item.json;\n\n// 1. Check output is non-empty\nconst content = body?.output ?? body?.text ?? body?.content ?? null;\nif (!content || String(content).trim() === '') {\n  throw new Error('VALIDATION_FAIL: AI Agent returned empty output');\n}\n\n// 2. Check routing key is valid (if present)\nconst route = body?.route ?? body?.agent ?? null;\nif (route && !VALID_ROUTES.includes(String(route).toLowerCase())) {\n  throw new Error(`VALIDATION_FAIL: Unknown routing key \"${route}\". Expected one of: ${VALID_ROUTES.join(', ')}`);\n}\n\n// 3. Check response is parseable if it looks like JSON\nconst trimmed = String(content).trim();\nif (trimmed.startsWith('{') || trimmed.startsWith('[')) {\n  try {\n    JSON.parse(trimmed);\n  } catch {\n    throw new Error('VALIDATION_FAIL: Response appears to be JSON but could not be parsed');\n  }\n}\n\n// All checks passed — pass item through cleanly\nreturn [{ json: { ...body, _validated: true, _route: route ?? 'default' } }];"
+      },
+      "type": "n8n-nodes-base.code",
+      "typeVersion": 2,
+      "position": [
+        1056,
+        -944
+      ],
+      "id": "17226321-8856-4456-85c7-dedbdaf6e7aa",
+      "name": "Validation Layer",
+      "retryOnFail": false,
+      "onError": "continueRegularOutput"
+    }
+  ],
+  "pinData": {},
+  "connections": {
+    "When chat message received": {
+      "main": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Markdown": {
+      "main": [
+        [
+          {
+            "node": "Task",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Send Update on AI Virtual Tutor": {
+      "main": [
+        []
+      ]
+    },
+    "Simple Memory": {
+      "ai_memory": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_memory",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Search Information about data analytics": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Code in JavaScript": {
+      "main": [
+        [
+          {
+            "node": "Send Update on AI Virtual Tutor",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Task": {
+      "main": [
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        [
+          {
+            "node": "Code in JavaScript",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "AI Agent": {
+      "main": [
+        [
+          {
+            "node": "If",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Teacher": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Research": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Quiz": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Assessment": {
+      "ai_tool": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_tool",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "Anthropic Chat Model": {
+      "ai_languageModel": [
+        [
+          {
+            "node": "AI Agent",
+            "type": "ai_languageModel",
+            "index": 0
+          }
+        ]
+      ]
+    },
+    "If": {
+      "main": [
+        [
+          {
+            "node": "Validation Layer",
+            "type": "main",
+            "index": 0
+          }
+        ],
+        []
+      ]
+    },
+    "Validation Layer": {
+      "main": [
+        [
+          {
+            "node": "Markdown",
+            "type": "main",
+            "index": 0
+          }
+        ]
+      ]
+    }
+  },
+  "active": true,
+  "settings": {
+    "executionOrder": "v1",
+    "binaryMode": "separate"
+  },
+  "versionId": "859aedcf-ec6c-4646-aaef-e8efbe1a8cb4",
+  "meta": {
+    "templateCredsSetupCompleted": true,
+    "instanceId": "d56b6ba84e48f96ae02cd01a1188588d3b8fc2efddc9a13c6da8b080f106466c"
+  },
+  "id": "6kpI50B57y3R3sA6",
+  "tags": []
+}
